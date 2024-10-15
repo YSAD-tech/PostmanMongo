@@ -1,9 +1,10 @@
 const express = require('express')
 const mongoose = require('mongoose')
-require('dotenv').config()
+const qrcode = require('qrcode')
 const holder = require ('./routes/holders')
 const Entry = require ('./routes/Entrys')
 const Laptops = require ('./routes/Laptops')
+require('dotenv').config()
 
 const app=express()
 app.use(express.json())
