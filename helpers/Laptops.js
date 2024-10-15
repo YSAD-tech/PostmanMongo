@@ -9,7 +9,7 @@ const helperLaptop = {
     },
 
     validarQRCode: async (qrcode) => {
-        const existe = await Laptop.find({ qrcode });
+        const existe = await Laptop.findOne({ qrcode });
         if (existe) {
             throw new Error("El qrcode ya existe");
         }

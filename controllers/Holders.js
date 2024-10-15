@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const Holder = require("../models/holders");
 const httpHolders = {
     // Listar todos los holders
@@ -31,6 +33,48 @@ const httpHolders = {
         } catch (error) {
             res.status(400).json({ error: "Operación no se realizó correctamente" });
             console.log(error);
+        }
+    },
+    // Crear nuevo Login
+    login: async (req, res) => {
+        const { email, password } = req.body;
+    
+        try {
+            // Buscar el holder por email
+            const holder = await Holder.findOne({ email });
+            if (!holder) {
+                return res.status(400).json({
+                    msg: "Holder / Password no son correctos"
+                });
+            }
+    
+            // Verificar si el holder está activo
+            if (holder.state === '0') {  // Asegúrate de que 'state' es la propiedad correcta
+                return res.status(400).json({
+                    msg: "Holder Inactivo"
+                });
+            }
+    
+            // Comparar la contraseña
+            const validPassword = bcrypt.compareSync(password, holder.password);
+            if (!validPassword) {
+                return res.status(400).json({
+                    msg: "Holder / Password no son correctos"
+                });
+            }
+    
+            // Generar el token JWT
+            const token = jwt.sign({ id: holder._id, rol: holder.rol }, process.env.JWT_SECRET, { expiresIn: '5s' });
+    
+            // Responder con el holder y el token
+            res.json({
+                holder,
+                token
+            });
+        } catch (error) {
+            return res.status(500).json({
+                msg: "Hable con el WebMaster"
+            });
         }
     },
     // Modificar un holder por ID

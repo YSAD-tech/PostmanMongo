@@ -1,8 +1,9 @@
 const { Router } = require("express");
 const {check} = require("express-validator")
-const httpHolders = require("../controllers/Holders");
-const {helperHolder} = require("../helpers/Holders")
-const {validarCampos} = require("../middleware/validar_datos")
+const httpHolders = require("..//controllers/Holders");
+const {validarJWT, generarJWT} = require("..//middleware/validar_JWT")
+const {helperHolder} = require("..//helpers/Holders")
+const {validarCampos} = require("..//middleware/validar_datos")
 const router = Router();
 // Rutas para holders
 router.get("/", httpHolders.getListarTodos); // Listar todos
@@ -10,12 +11,13 @@ router.get("/", httpHolders.getListarTodos); // Listar todos
 router.get("/:id",[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
-    validarCampos
 ], httpHolders.getListarPorId); // Listar por ID
 
 router.post("/",[
+    validarJWT,
+    generarJWT,
     check("email", "El email es obligatorio").notEmpty(),
-    check("email","el email debe ser unico").custom(helperHolder.validarEmail),
+    check("email","El email debe ser unico").custom(helperHolder.validarEmail),
     check("password", "La contraseña es obligatoria").notEmpty(),
     check("password", "la contraseña debe ser mínimo de 8 caracteres").isLength({min:8}),
     check("document", "el documento es obligatorio").notEmpty(),
@@ -26,23 +28,24 @@ router.post("/",[
     check("state", "El estado es obligatorio").notEmpty(),
     validarCampos
 ], httpHolders.postHolder); // Crear holder
+router.post("/login",[
+    validarJWT,
+    generarJWT
+],httpHolders.postHolder);
 
 router.put("/:id",[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
-    validarCampos
 ], httpHolders.putModificar); // Modificar holder
 
 router.put("/activar/:id",[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
-    validarCampos
 ], httpHolders.putActivar); // Activar holder
 
 router.put("/inactivar/:id",[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
-    validarCampos
 ], httpHolders.putInactivar); // Inactivar holder
 
 module.exports = router;
