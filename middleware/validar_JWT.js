@@ -1,23 +1,19 @@
 const jwt = require('jsonwebtoken');
+const Holder = require('../models/holders');
 const generarJWT = (uid) => {
-  return new Promise((resolve, reject) => {
-    const payload = { uid };
-    jwt.sign(
-      payload,
-      process.env.SECRETORPRIVATEKEY,
-      {
-        expiresIn: "4h", //4h
-      },
-      (err, token) => {
-        if (err) {
-          console.log(err);
-          reject("No se pudo generar el token");
-        } else {
-          resolve(token);
-        }
-      }
-    );
-  });
+    return new Promise((resolve, reject) => {
+        const payload = { uid }; 
+        jwt.sign(payload, process.env.SECRETORPRIVATEKEY, {
+            expiresIn: '4h' // Token expira en 4 horas
+        }, (err, token) => {
+            if (err) {
+                console.log(err);
+                reject('No se pudo generar el token');
+            } else {
+                resolve(token);
+            }
+        });
+    });
 };
 
 const validarJWT = async (req, res, next) => {
@@ -32,12 +28,12 @@ const validarJWT = async (req, res, next) => {
     let usuario = await Holder.findById(uid);
     if (!usuario) {
       return res.status(401).json({
-        msg: "Token no válido ", //- usuario no existe DB
+        msg: "Token no válido DB", //- usuario no existe DB
       });
     }
     if (usuario.estado == 0) {
       return res.status(401).json({
-        msg: "Token no válido ", //- usuario con estado: false
+        msg: "Token no válido false", //- usuario con estado: false
       });
     }
     next();
@@ -48,4 +44,4 @@ const validarJWT = async (req, res, next) => {
   }
 };
 
-module.exports = {validarJWT, generarJWT}
+module.exports = {validarJWT, generarJWT};

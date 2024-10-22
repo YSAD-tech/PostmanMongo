@@ -1,21 +1,19 @@
 const { Router } = require("express");
 const {check} = require("express-validator")
 const httpHolders = require("..//controllers/Holders");
-const {validarJWT, generarJWT} = require("..//middleware/validar_JWT")
+const {validarJWT} = require("..//middleware/validar_JWT.js")
 const {helperHolder} = require("..//helpers/Holders")
 const {validarCampos} = require("..//middleware/validar_datos")
 const router = Router();
 // Rutas para holders
-router.get("/", httpHolders.getListarTodos); // Listar todos
+router.get("/",validarJWT,httpHolders.getListarTodos); // Listar todos
 
-router.get("/:id",[
+router.get("/:id",validarJWT,[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
 ], httpHolders.getListarPorId); // Listar por ID
 
-router.post("/",[
-    validarJWT,
-    generarJWT,
+router.post("/",validarJWT,[
     check("email", "El email es obligatorio").notEmpty(),
     check("email","El email debe ser unico").custom(helperHolder.validarEmail),
     check("password", "La contraseña es obligatoria").notEmpty(),
@@ -29,21 +27,22 @@ router.post("/",[
     validarCampos
 ], httpHolders.postHolder); // Crear holder
 router.post("/login",[
-    validarJWT,
-    generarJWT
+    check("email", "El email es obligatorio").notEmpty(),
+    check("password", "La password es obligatoria").notEmpty(),
+    validarCampos
 ],httpHolders.postHolder);
 
-router.put("/:id",[
+router.put("/:id",validarJWT,[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
 ], httpHolders.putModificar); // Modificar holder
 
-router.put("/activar/:id",[
+router.put("/activar/:id",validarJWT,[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
 ], httpHolders.putActivar); // Activar holder
 
-router.put("/inactivar/:id",[
+router.put("/inactivar/:id",validarJWT,[
     check("id","Id no valido").isMongoId(), 
     check("id","no existe en la bd").custom(helperHolder.validarId),
 ], httpHolders.putInactivar); // Inactivar holder
