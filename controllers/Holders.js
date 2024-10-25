@@ -1,14 +1,44 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const Holder = require("../models/holders");
+const bcrypt = require('bcryptjs'); 
+const token=require("../middleware/validar_jwt")
+const { generarJWT } = require('../middleware/validar_jwt');
 const httpHolders = {
+    postlogin: async (req, res) => {
+        const { email, password } = req.body;
+        try {
+            const holder = await Holder.findOne({ email });
+            if (!holder) {
+                return res.status(404).json({ msg: "Holder no encontrado" });
+            }
+            
+            if (holder.estado === 0) {
+                return res.status(403).json({ msg: "Holder inactivo" });
+            }
+    
+            const validarPassword = bcrypt.compare(password, holder.password);
+            console.log("contraseña recibida:",password)
+            console.log("constraseña almacenada ", holder.password)
+            console.log("constraseña valida",validarPassword)
+            console.log("Comparando contraseñas para el usuario:", holder.email);
+            if (!validarPassword) {
+                return res.status(401).json({ msg: "Password incorrecto" });
+            } 
+    
+            const token = await generarJWT(holder.id);
+            res.json({ holder, token });
+        } catch (error) {
+            console.error("Error en postlogin:", error);
+            console.error(error); 
+            return res.status(500).json({ msg: "No se pudo realizar la operación" });
+        }
+    },
     // Listar todos los holders
     getListarTodos: async (req, res) => {
         try {
             const holders = await Holder.find();
             res.json({ holders });
         } catch (error) {
-            res.status(400).json({ error: "Operación no se realizó correctamentet" });
+            res.status(400).json({ error: "Operación no se realizó correctamente" });
             console.log(error);
         }
     },
@@ -19,7 +49,7 @@ const httpHolders = {
             const holder = await Holder.findById(id);
             res.json({ holder });
         } catch (error) {
-            res.status(400).json({ error: "Operación no se realizó correctamentes" });
+            res.status(400).json({ error: "Operación no se realizó correctamente" });
             console.log(error);
         }
     },
@@ -31,55 +61,8 @@ const httpHolders = {
             await holder.save();
             res.json({ holder });
         } catch (error) {
-            console.error("Error al crear el holder:", error);
-            res.status(400).json({ error: "Operación no se realizó correctamenteh" });
+            res.status(400).json({ error: "Operación no se realizó correctamente" });
             console.log(error);
-        }
-    },
-    // Crear nuevo Login
-    login: async (req, res) => {
-        const { email, password } = req.body;
-    
-        try {
-            // Buscar el holder por email
-            const holder = await Holder.findOne({ email });
-            if (!holder) {
-                return res.status(400).json({
-                    msg: "Holder no correcto"
-                });
-            }
-    
-            // Verificar si el holder está activo
-            if (holder.state === '0') {  // Asegúrate de que 'state' es la propiedad correcta
-                return res.status(403).json({
-                    msg: "Holder Inactivo"
-                })
-            }
-    
-            // Comparar la contraseña
-            const validPassword = bcrypt.compareSync(password, holder.password);
-            console.log("contraseña recibida",password)
-            console.log("contraseña almacena",holder.password)
-            console.log("contraseña valida",validPassword)
-            if (!validPassword) {
-                return res.status(401).json({
-                    msg: "Password incorrecto"
-                })
-            }
-    
-            // Generar el token JWT
-            const token = await generarJWT(holder.id)
-    
-            // Responder con el holder y el token
-            res.json({
-                holder,
-                token
-            });
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({
-                msg: "Hable con el WebMaster"
-            });
         }
     },
     // Modificar un holder por ID

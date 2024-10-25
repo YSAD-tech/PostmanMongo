@@ -1,29 +1,24 @@
 const Entry = require("..//models/Entrys");
 
 const helperEntry = {
-
-    validarHolder: async (id) => {
-
-        const entry = await Entry.findById(id);
-        if (!entry) {
-            throw new Error("Id no existe");
-        } 
+    validarId: async (id) => {
+      const existe = await Entry.findById(id);
+      if (!existe) {
+        throw new Error("El ID no existe en la BD");
+      }
     },
-
-    validarDate: async (date) => {
-        const entry = await Entry.findOne({date});
-        if (entry.length > 0) {
-            throw new Error("la fecha ya existe");
-        }
+    validarLaptop: async (laptopId) => {
+      const existe = await Laptop.findById(laptopId);
+      if (!existe) {
+        throw new Error("La laptop no existe en la BD");
+      }
     },
-
-    validarTime: async (time) => {
-        const entry = await Entry.findOne({time});
-        if (entry.length > 0) {
-            throw new Error("la hora ya existe");
-        }
-    },
-
-}
+    validarHolder: async (holderId) => {
+      const existe = await Holder.findById(holderId);
+      if (!existe) {
+        throw new Error("El holder no existe en la BD");
+      }
+    }
+  }
 
 module.exports = helperEntry;

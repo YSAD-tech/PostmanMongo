@@ -1,29 +1,38 @@
 const Holder = require("..//models/holders");
 
 const helperHolder = {
-    validarEmail: async (email)=> {
-        const existe = await Holder.findOne({email})
-        if(existe){
-            throw new Error("el email ya existe");
-            
-        }
-    },
-
-    validarDocument: async (document)=> {
-            const existe = await Holder.findOne({document})
-            if(existe){
-                throw new Error("el documento ya existe");
-                
-            }
-    },
-
-    validarId: async (id) => {
-        const existe = await Holder.findById(id)
-        if(!existe){
-            throw new Error("Id no existe");
-            
-        }
+  validarEmail: async (email = '') => {
+   
+    const existe = await Holder.findOne({ email });
+    if (existe) {
+      throw new Error(`El email ${email} ya está registrado`);
     }
-}
+  },
 
-module.exports = {helperHolder}
+  validarId: async (id) => {
+    
+    const existe = await Holder.findById(id);
+    if (!existe) {
+      throw new Error(`El ID ${id} no existe`);
+    }
+  },
+
+
+
+  validarDocumento: async (document = '') => {
+   
+    const existe = await Holder.findOne({ document });
+    if (existe) {
+      throw new Error(`El documento ${document} ya está registrado`);
+    }
+  },
+
+  validarFicha: (ficha = '') => {
+    
+    if (isNaN(ficha)) {
+      throw new Error("La ficha debe ser un número válido");
+    }
+  }
+};
+
+module.exports = { helperHolder };
